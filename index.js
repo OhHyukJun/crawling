@@ -23,18 +23,26 @@ const fs = require('fs');
 const csvWriter = require('csv-writer').createObjectCsvWriter;
 const csv = require('csv-parser');
 const XLSX = require('xlsx');
+const iconv = require('iconv-lite'); //한글깨짐방지
 
-const url = 'http://addon.jinhakapply.com/RatioV1/RatioH/Ratio10190351.html';
+const url = 'http://addon.jinhakapply.com/RatioV1/RatioH/Ratio10550281.html';
 
 async function crawlWebsite() {
   try {
-    const response = await axios.get(url);
-    const $ = cheerio.load(response.data);
-    const textContent = $('td.rate4').text();
-    textContent.toString('utf-8');
-    // Convert text content to an array of objects for CSV writing
+    await axios({
+      url: url,
+      method: "GET",
+      responseType: "arraybuffer",
+    }).then(async (html) => {
+                const data = iconv.decode(html.data, "utf-8").toString();
+    const $ = cheerio.load(data);
+    const textContent = $('td.unit').text();
+    
+    //textContent.toString('EUC-KR');
+    //textContent.encoding('euc-kr');
+    
     const rows = [{ content: textContent }];
-
+    
     const csvPath = 'website_content.csv';
     await writeToCSV(rows, csvPath);
 
@@ -44,9 +52,9 @@ async function crawlWebsite() {
 
     const xlsxPath = 'website_content.xlsx';
     XLSX.writeFile(workbook, xlsxPath);
-    console.log('XLSX file created successfully.');
+  });
   } catch (error) {
-    console.error('Error occurred during crawling:', error);
+    console.error('에러', error);
   }
 }
 
@@ -63,25 +71,20 @@ async function writeToCSV(rows, csvPath) {
     });
   }
 
-async function csvToWorksheet(csvPath) {
-  return new Promise((resolve, reject) => {
-    const readStream = fs.createReadStream(csvPath);
-    const worksheet = {};
-    const data = [];
-    readStream
-      .pipe(csv())
-      .on('data', row => data.push(row))
-      .on('end', () => {
-        worksheet['!ref'] = `A1:A${data.length}`;
-        worksheet['A1'] = { t: 's', v: 'content' };
-        data.forEach((row, index) => {
-          worksheet[`A${index + 2}`] = { t: 's', v: row.content };
-        });
-        resolve(worksheet);
-      })
-      .on('error', reject);
-  });
-}
+  async function csvToWorksheet(csvPath) {
+    return new Promise((resolve, reject) => {
+      const data = [];
+      fs.createReadStream(csvPath)
+        .pipe(csv())
+        .on('data', row => data.push(row))
+        .on('end', () => {
+          const worksheet = XLSX.utils.json_to_sheet(data);
+          resolve(worksheet);
+        })
+        .on('error', reject);
+    });
+  }
+
 
 crawlWebsite();
 
