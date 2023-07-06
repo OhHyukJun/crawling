@@ -25,7 +25,7 @@ const csvWriter = require('csv-writer').createObjectCsvWriter;
 //const XLSX = require('xlsx');
 const iconv = require('iconv-lite'); //한글깨짐방지
 
-const url = 'http://addon.jinhakapply.com/RatioV1/RatioH/Ratio10080141.html';
+const url = 'http://addon.jinhakapply.com/RatioV1/RatioH/Ratio10950451.html';
 
 async function crawlWebsite() {
   try {
@@ -37,7 +37,7 @@ async function crawlWebsite() {
                 const data = iconv.decode(html.data, "utf-8").toString();
                 //한글이 깨지는 것을 방지하기 위한 코드
     const $ = cheerio.load(data);
-    const textContent = $('td.unit').text();
+    const textContent = $('tr').text();
     //hrml 태그를 확인해 크롤링할  정보의 class 명을 사용하여 크롤링 진행
     
    
@@ -60,7 +60,10 @@ async function writeToCSV(rows, csvPath) {
   try {
     const csvWriterInstance = csvWriter({
       path: csvPath,
-      header: [{ id: 'content', title: '경쟁률 정보' }]
+      header: [
+        { id: 'content', title: '경쟁률 정보' }
+    ],
+      
     });
 
     await csvWriterInstance.writeRecords(rows);
