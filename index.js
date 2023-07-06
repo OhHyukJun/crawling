@@ -19,13 +19,13 @@ records.forEach((movieInfo, i) => {
 */
 const axios = require('axios');
 const cheerio = require('cheerio');
-const fs = require('fs');
+//const fs = require('fs');
 const csvWriter = require('csv-writer').createObjectCsvWriter;
-const csv = require('csv-parser');
-const XLSX = require('xlsx');
+//const csv = require('csv-parser');
+//const XLSX = require('xlsx');
 const iconv = require('iconv-lite'); //한글깨짐방지
 
-const url = 'http://addon.jinhakapply.com/RatioV1/RatioH/Ratio10550281.html';
+const url = 'http://addon.jinhakapply.com/RatioV1/RatioH/Ratio10080141.html';
 
 async function crawlWebsite() {
   try {
@@ -35,23 +35,21 @@ async function crawlWebsite() {
       responseType: "arraybuffer",
     }).then(async (html) => {
                 const data = iconv.decode(html.data, "utf-8").toString();
+                //한글이 깨지는 것을 방지하기 위한 코드
     const $ = cheerio.load(data);
     const textContent = $('td.unit').text();
+    //hrml 태그를 확인해 크롤링할  정보의 class 명을 사용하여 크롤링 진행
     
-    //textContent.toString('EUC-KR');
-    //textContent.encoding('euc-kr');
+   
     
     const rows = [{ content: textContent }];
-    
+    //데이터를 rows로 삽입 -> 행렬로 삽입하고 싶다
     const csvPath = 'website_content.csv';
-    await writeToCSV(rows, csvPath);
-
-    const workbook = XLSX.utils.book_new();
-    const worksheet = await csvToWorksheet(csvPath);
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
-
-    const xlsxPath = 'website_content.xlsx';
-    XLSX.writeFile(workbook, xlsxPath);
+    //csv 생성 경로
+    await writeToCSV(rows, csvPath)
+      .then(() => console.log("성공"))
+      .catch((error) => console.log('실패'));
+      // 이거까진 잘되는 거 같음
   });
   } catch (error) {
     console.error('에러', error);
@@ -59,32 +57,21 @@ async function crawlWebsite() {
 }
 
 async function writeToCSV(rows, csvPath) {
-    return new Promise((resolve, reject) => {
-      const csvWriterInstance = csvWriter({
-        path: csvPath,
-        header: [{ id: 'content', title: 'Content' }]
-      });
-      csvWriterInstance
-        .writeRecords(rows)
-        .then(() => resolve())
-        .catch(reject);
+  try {
+    const csvWriterInstance = csvWriter({
+      path: csvPath,
+      header: [{ id: 'content', title: '경쟁률 정보' }]
     });
-  }
 
-  async function csvToWorksheet(csvPath) {
-    return new Promise((resolve, reject) => {
-      const data = [];
-      fs.createReadStream(csvPath)
-        .pipe(csv())
-        .on('data', row => data.push(row))
-        .on('end', () => {
-          const worksheet = XLSX.utils.json_to_sheet(data);
-          resolve(worksheet);
-        })
-        .on('error', reject);
-    });
+    await csvWriterInstance.writeRecords(rows);
+    //주어진 rows 배열의 데이터를 csv 파일에 작성
+    
+    return;
+    //변환 성공값을 출력
+  } catch (error) {
+    throw error;
   }
-
+}
 
 crawlWebsite();
 
