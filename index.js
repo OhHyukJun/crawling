@@ -14,11 +14,16 @@ async function crawling() {
     });//axios를 사용해 데이터를 불러온다
 
     const data = iconv.decode(html.data, 'utf-8').toString();
+
+    //const data = iconv.decode(html.data, 'euc-kr').toString();
     // 유웨이 일때는 utf-8을 euc-kr로 변경
+
     const Data = cheerio.load(data);
     // cheerio를 사용하여 data를 파싱하고 Data 변수에 할당하여 사용
+
     const rows = [];
     // 데이터를 저장할 rows 배열
+
     Data('tr').each((index, element) => {
         const rowData = [];
         Data(element)
@@ -39,8 +44,10 @@ async function crawling() {
       
     const xlsxPath = './xlsx/crawling_data.xlsx';
     //xlsx 파일을 만들 경로
+
     writeToXLSX(rows, xlsxPath);
     //xlsx 파일 작성
+
     console.log('성공');
   } catch (error) {
     console.error('에러', error);
@@ -55,12 +62,14 @@ function writeToXLSX(data, xlsxPath) {
 
   const worksheet = xlsx.utils.json_to_sheet(data);
   // sheet 생성 - json_to_sheet 방식
-  //const range = xlsx.utils.decode_range(worksheet['!ref']);
+
+  const range = xlsx.utils.decode_range(worksheet['!ref']);
   // xlsx.utils.decode_range는 워크시트 범위를 디코딩해준다 !ref가 범위
-  //worksheet['!ref'] = xlsx.utils.encode_range(range);
-  // 디코딩된 range를 다시 인코딩하여 실제 크기를 넘는지 체크
+  worksheet['!ref'] = xlsx.utils.encode_range(range);
+  // 디코딩된 range를 다시 인코딩하여 실제 크기를 넘는지 체크 구글링 하던 중에 추가한 코드 잘 이해가 가지는 않는다
+
   xlsx.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
-  // 첫 시트에 데이터 추가
+  // 첫 시트에 데이터 추가 -> 파일이 추가될 때마다 sheet 수를 늘려주면 좋을거 같다
   xlsx.writeFile(workbook, xlsxPath);
   // 액셀 파일 생성
 }
