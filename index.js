@@ -50,11 +50,14 @@ async function crawling() {
 function writeToXLSX(data, xlsxPath) {
   const workbook = xlsx.utils.book_new();
   //통합 문서 생성
-  const worksheet = xlsx.utils.aoa_to_sheet(data);
-  // 데이터를 작성할 워크시트 생성
-  const range = xlsx.utils.decode_range(worksheet['!ref']);
+  //const worksheet = xlsx.utils.aoa_to_sheet(data);
+  // 데이터를 작성할 워크시트 생성 aoa_to_Sheet 방식
+
+  const worksheet = xlsx.utils.json_to_sheet(data);
+  // sheet 생성 - json_to_sheet 방식
+  //const range = xlsx.utils.decode_range(worksheet['!ref']);
   // xlsx.utils.decode_range는 워크시트 범위를 디코딩해준다 !ref가 범위
-  worksheet['!ref'] = xlsx.utils.encode_range(range);
+  //worksheet['!ref'] = xlsx.utils.encode_range(range);
   // 디코딩된 range를 다시 인코딩하여 실제 크기를 넘는지 체크
   xlsx.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
   // 첫 시트에 데이터 추가
