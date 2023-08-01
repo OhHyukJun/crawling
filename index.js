@@ -46,7 +46,7 @@ async function crawling() {
     var ExcelData = [];
     $("div[id^='SelType'] table").each(function(){
         var Table = $(this), FirstTHCnt = Table.find("tbody tr:eq(0):has(th)").find("th").length;
-        if(FirstTHCnt == 6){ // 계열 + 대학 + 최대모집 + 지원인원
+        if(FirstTHCnt == 5){ // 계열 + 대학 + 최대모집 + 지원인원
             var SelType = ''; //Table.prev('h2').find("strong").text();
             var RowData = Table.find("tr:has(td):not(.total)").map(function(){
                 var TR = $(this), TDGroup = TR.find("td"), TDCnt = TDGroup.length;
@@ -54,26 +54,22 @@ async function crawling() {
                 //     (TDCnt == 4) ? TDGroup.eq(1).text() : 
                 //     (TDCnt == 3) ? TDGroup.eq(0).text() : "";
 
-                var Major = TDGroup.eq(0).text(), ApplyCnt = TDGroup.eq(1).text();
+                var Major = TDGroup.eq(1).text(), ApplyCnt = TDGroup.eq(3).text();
 
                 // 가장 가까운 값이 있는 TR 찾기
                 // var ClosestTRHasData = TR.prev("tr:has(td[rowSpan]:not([class]))")
 
 
                 var Personnel = "", Ratio = "";
-                if(TDCnt == 6){
+                if(TDCnt == 5){
                   Major = TDGroup.eq(1).text();
-                  Personnel = TDGroup.eq(3).text();
-                  ApplyCnt = TDGroup.eq(4).text();
-                  Ratio = TDGroup.eq(5).text();
-                }
-                else if(TDCnt == 5){
-                  Major = TDGroup.eq(1).text();
+                  Personnel = TDGroup.eq(2).text();
                   ApplyCnt = TDGroup.eq(3).text();
                   Ratio = TDGroup.eq(4).text();
                 }
                 else if(TDCnt == 4){
                   Major = TDGroup.eq(0).text();
+                  Personnel = TDGroup.eq(1).text();
                   ApplyCnt = TDGroup.eq(2).text();
                   Ratio = TDGroup.eq(3).text();
                 }
@@ -92,6 +88,47 @@ async function crawling() {
 
             // Data.push(RowData); // 2차원 배열이 됨
             ExcelData = ExcelData.concat(RowData); // 배열끼리 병합
+        }
+        else if(FirstTHCnt == 6){ // 계열 + 대학 + 최대모집 + 지원인원
+          var SelType = ''; //Table.prev('h2').find("strong").text();
+          var RowData = Table.find("tr:has(td):not(.total)").map(function(){
+              var TR = $(this), TDGroup = TR.find("td"), TDCnt = TDGroup.length;
+              // var Major = (TDCnt == 7) ? TDGroup.eq(2).text() : 
+              //     (TDCnt == 4) ? TDGroup.eq(1).text() : 
+              //     (TDCnt == 3) ? TDGroup.eq(0).text() : "";
+
+              var Major = TDGroup.eq(0).text(), ApplyCnt = TDGroup.eq(1).text();
+
+              // 가장 가까운 값이 있는 TR 찾기
+              // var ClosestTRHasData = TR.prev("tr:has(td[rowSpan]:not([class]))")
+
+
+              var Personnel = "", Ratio = "";
+              if(TDCnt == 6){
+                Major = TDGroup.eq(1).text();
+                Personnel = TDGroup.eq(3).text();
+                ApplyCnt = TDGroup.eq(4).text();
+                Ratio = TDGroup.eq(5).text();
+              }
+              else if(TDCnt == 5){
+                Major = TDGroup.eq(1).text();
+                ApplyCnt = TDGroup.eq(3).text();
+                Ratio = TDGroup.eq(4).text();
+              }
+              else if(TDCnt == 4){
+                Major = TDGroup.eq(0).text();
+                ApplyCnt = TDGroup.eq(2).text();
+                Ratio = TDGroup.eq(3).text();
+              }
+              else if(TDCnt == 2){
+                Major = TDGroup.eq(0).text();
+                ApplyCnt = TDGroup.eq(1).text();
+              }
+
+              return {SelType : SelType, Major : Major, Personnel : Personnel, ApplyCnt : ApplyCnt, Ratio : Ratio}
+          }).get();
+
+          ExcelData = ExcelData.concat(RowData);
         }
     });
     // console.log(ExcelData);
@@ -161,7 +198,7 @@ async function crawling() {
     });
 
     console.log(merge);
-    console.log("홍익대 서경대 크롤링 가능");
+    //console.log("숙명여대 연세대 서울여대 크롤링 가능");
 
     
     const xlsxPath = './xlsx/crawling_data.xlsx';
