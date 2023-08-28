@@ -3,7 +3,7 @@ const cheerio = require('cheerio');
 const xlsx = require('xlsx');
 const iconv = require('iconv-lite');
 
-const url = 'http://addon.jinhakapply.com/RatioV1/RatioH/Ratio11720331.html';
+const url = 'http://addon.jinhakapply.com/RatioV1/RatioH/Ratio11640251.html';
 // 진학사 url
 //const url = 'http://ratio.uwayapply.com/Sl5KcldhVlc4TjlKJmB9YWhKemZUZg==';
 // 유웨이 url
@@ -46,48 +46,43 @@ async function crawling() {
     var ExcelData = [];
     $("div[id^='SelType'] table").each(function(){
         var Table = $(this), FirstTHCnt = Table.find("tbody tr:eq(0):has(th)").find("th").length;
-        if(FirstTHCnt == 5){ // 계열 + 대학 + 최대모집 + 지원인원
-            var SelType = ''; //Table.prev('h2').find("strong").text();
-            var RowData = Table.find("tr:has(td):not(.total)").map(function(){
-                var TR = $(this), TDGroup = TR.find("td"), TDCnt = TDGroup.length;
-                // var Major = (TDCnt == 7) ? TDGroup.eq(2).text() : 
-                //     (TDCnt == 4) ? TDGroup.eq(1).text() : 
-                //     (TDCnt == 3) ? TDGroup.eq(0).text() : "";
+        
+        if (FirstTHCnt == 7){ // 계열 + 대학 + 최대모집 + 지원인원
+          var SelType = ''; //Table.prev('h2').find("strong").text();
+          var RowData = Table.find("tr:has(td):not(.total)").map(function(){
+              var TR = $(this), TDGroup = TR.find("td"), TDCnt = TDGroup.length;
+              // var Major = (TDCnt == 7) ? TDGroup.eq(2).text() : 
+              //     (TDCnt == 4) ? TDGroup.eq(1).text() : 
+              //     (TDCnt == 3) ? TDGroup.eq(0).text() : "";
 
-                var Major = TDGroup.eq(1).text(), ApplyCnt = TDGroup.eq(3).text();
+              var Major = TDGroup.eq(2).text(), ApplyCnt = TDGroup.eq(5).text();
 
-                // 가장 가까운 값이 있는 TR 찾기
-                // var ClosestTRHasData = TR.prev("tr:has(td[rowSpan]:not([class]))")
+              // 가장 가까운 값이 있는 TR 찾기
+              // var ClosestTRHasData = TR.prev("tr:has(td[rowSpan]:not([class]))")
 
 
-                var Personnel = "", Ratio = "";
-                if(TDCnt == 5){
-                  Major = TDGroup.eq(1).text();
-                  Personnel = TDGroup.eq(2).text();
-                  ApplyCnt = TDGroup.eq(3).text();
-                  Ratio = TDGroup.eq(4).text();
-                }
-                else if(TDCnt == 4){
-                  Major = TDGroup.eq(0).text();
-                  Personnel = TDGroup.eq(1).text();
-                  ApplyCnt = TDGroup.eq(2).text();
-                  Ratio = TDGroup.eq(3).text();
-                }
-                else if(TDCnt == 2){
-                  Major = TDGroup.eq(0).text();
-                  ApplyCnt = TDGroup.eq(1).text();
-                }
+              var Personnel = "", Ratio = "";
+              if(TDCnt == 7){
+                Major = TDGroup.eq(2).text();
+                Personnel = TDGroup.eq(4).text();
+                ApplyCnt = TDGroup.eq(5).text();
+                console.log(TDGroup.eq(6));
+                Ratio = TDGroup.eq(6);
+              }
+              else if(TDCnt == 4){
+                Major = TDGroup.eq(1).text();
+                ApplyCnt = TDGroup.eq(3).text();
+              }
+              else if(TDCnt == 3){
+                Major = TDGroup.eq(0).text();
+                ApplyCnt = TDGroup.eq(2).text();
+                
+              }
 
-                return {SelType : SelType, Major : Major, Personnel : Personnel, ApplyCnt : ApplyCnt, Ratio : Ratio}
-            }).get();
+              return {SelType : SelType, Major : Major, Personnel : Personnel, ApplyCnt : ApplyCnt, Ratio : Ratio}
+          }).get();
 
-            // RowData.forEach((item, index, array) => {
-            //   if(!item.Personnel) item.Personnel = array[index-1].Personnel;
-            //   if(!item.Ratio) item.Ratio = array[index-1].Ratio;
-            // });
-
-            // Data.push(RowData); // 2차원 배열이 됨
-            ExcelData = ExcelData.concat(RowData); // 배열끼리 병합
+          ExcelData = ExcelData.concat(RowData);
         }
         else if(FirstTHCnt == 6){ // 계열 + 대학 + 최대모집 + 지원인원
           var SelType = ''; //Table.prev('h2').find("strong").text();
@@ -126,6 +121,100 @@ async function crawling() {
               }
 
               return {SelType : SelType, Major : Major, Personnel : Personnel, ApplyCnt : ApplyCnt, Ratio : Ratio}
+          }).get();
+
+          ExcelData = ExcelData.concat(RowData);
+        }
+        else if(FirstTHCnt == 5){ // 계열 + 대학 + 최대모집 + 지원인원
+          var SelType = ''; //Table.prev('h2').find("strong").text();
+          var RowData = Table.find("tr:has(td):not(.total)").map(function(){
+              var TR = $(this), TDGroup = TR.find("td"), TDCnt = TDGroup.length;
+              // var Major = (TDCnt == 7) ? TDGroup.eq(2).text() : 
+              //     (TDCnt == 4) ? TDGroup.eq(1).text() : 
+              //     (TDCnt == 3) ? TDGroup.eq(0).text() : "";
+
+              var Major = TDGroup.eq(1).text(), ApplyCnt = TDGroup.eq(3).text();
+
+              // 가장 가까운 값이 있는 TR 찾기
+              // var ClosestTRHasData = TR.prev("tr:has(td[rowSpan]:not([class]))")
+
+
+              var Personnel = "", Ratio = "";
+              if(TDCnt == 5){
+                Major = TDGroup.eq(1).text();
+                Personnel = TDGroup.eq(2).text();
+                ApplyCnt = TDGroup.eq(3).text();
+                Ratio = TDGroup.eq(4).text();
+              }
+              else if(TDCnt == 4){
+                Major = TDGroup.eq(0).text();
+                Personnel = TDGroup.eq(1).text();
+                ApplyCnt = TDGroup.eq(2).text();
+                Ratio = TDGroup.eq(3).text();
+              }
+              else if(TDCnt == 2){
+                Major = TDGroup.eq(0).text();
+                ApplyCnt = TDGroup.eq(1).text();
+              }
+
+              return {SelType : SelType, Major : Major, Personnel : Personnel, ApplyCnt : ApplyCnt, Ratio : Ratio}
+          }).get();
+
+          // RowData.forEach((item, index, array) => {
+          //   if(!item.Personnel) item.Personnel = array[index-1].Personnel;
+          //   if(!item.Ratio) item.Ratio = array[index-1].Ratio;
+          // });
+
+          // Data.push(RowData); // 2차원 배열이 됨
+          ExcelData = ExcelData.concat(RowData); // 배열끼리 병합
+        }
+        else if(FirstTHCnt == 3){ // 계열 + 대학 + 최대모집 + 지원인원
+          var SelType = ''; //Table.prev('h2').find("strong").text();
+          var RowData = Table.find("tr:has(td):not(.total)").map(function(){
+              var TR = $(this), TDGroup = TR.find("td"), TDCnt = TDGroup.length;
+              // var Major = (TDCnt == 7) ? TDGroup.eq(2).text() : 
+              //     (TDCnt == 4) ? TDGroup.eq(1).text() : 
+              //     (TDCnt == 3) ? TDGroup.eq(0).text() : "";
+
+              var Major = TDGroup.eq(0).text(), ApplyCnt = TDGroup.eq(2).text();
+
+              // 가장 가까운 값이 있는 TR 찾기
+              // var ClosestTRHasData = TR.prev("tr:has(td[rowSpan]:not([class]))")
+
+
+              //var Personnel = "", Ratio = "";
+              if(TDCnt == 3){
+                Major = TDGroup.eq(0).text();
+                ApplyCnt = TDGroup.eq(2).text();
+              
+              }
+              else if(TDCnt == 2){
+                Major = TDGroup.eq(0).text();
+                ApplyCnt = TDGroup.eq(1).text();
+              }
+
+              return {SelType : SelType, Major : Major, ApplyCnt : ApplyCnt,}
+          }).get();
+
+          ExcelData = ExcelData.concat(RowData);
+        }
+        else if(FirstTHCnt == 2){ // 계열 + 대학 + 최대모집 + 지원인원
+          var SelType = ''; //Table.prev('h2').find("strong").text();
+          var RowData = Table.find("tr:has(td):not(.total)").map(function(){
+              var TR = $(this), TDGroup = TR.find("td"), TDCnt = TDGroup.length;
+              // var Major = (TDCnt == 7) ? TDGroup.eq(2).text() : 
+              //     (TDCnt == 4) ? TDGroup.eq(1).text() : 
+              //     (TDCnt == 3) ? TDGroup.eq(0).text() : "";
+
+              var Major = TDGroup.eq(0).text(), ApplyCnt = TDGroup.eq(1).text();
+
+              // 가장 가까운 값이 있는 TR 찾기
+              // var ClosestTRHasData = TR.prev("tr:has(td[rowSpan]:not([class]))")
+
+
+              //var Personnel = "", Ratio = "";
+
+              return {SelType : SelType, Major : Major, ApplyCnt : ApplyCnt,}
           }).get();
 
           ExcelData = ExcelData.concat(RowData);
